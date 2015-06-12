@@ -19,6 +19,10 @@ var hashName = function(fileName, data, options){
 
 var packUrlAsset = function(url, srcDir, destDir, options){
 
+    if(/^data:/.test(url)){
+        return url
+    }
+
     if (options.debug){
         console.log('packUrlAsset', url, srcDir, destDir)
     }
@@ -66,11 +70,6 @@ var packUrlAsset = function(url, srcDir, destDir, options){
         putFilePath = path.resolve(assetDestDir, fileName)
 
         fs.outputFileSync(putFilePath, data)
-        //fs.outputFile(putFilePath, data, function(err){
-        //    if (err){
-        //        console.error(err)
-        //    }
-        //})
 
         options.packedAssets[filePath] = putFilePath
     }
@@ -79,7 +78,6 @@ var packUrlAsset = function(url, srcDir, destDir, options){
         cutIndex = rootPath.length + (absolute ? 0 : 1),
         newUrl = putFilePath.substring(cutIndex).replace(/\\/g, '/') + fileNameAppendix
 
-    //console.warn('packUrlAsset newUrl', url, rootPath, newUrl)
     return newUrl
 }
 
@@ -140,11 +138,7 @@ var packIndex = function(bundles, options){
             ' data-bundles-path="."></script>'].join('')
     )
 
-
     fs.outputFileSync(destPath, indexData)
-    //fs.outputFile(destPath, indexData, function(err){
-    //    console.log(err)
-    //})
 }
 
 var packCssAssets = function(source, srcDir, options){
@@ -154,7 +148,7 @@ var packCssAssets = function(source, srcDir, options){
         // steal still fucks up with windows paths
         orgUrl = orgUrl.replace(/\\/, '/')
 
-        var url = orgUrl.substring(4, orgUrl.length - 1).trim()
+        var url = orgUrl.substring(4, orgUrl.length - 1).replace(/["']/g, '').trim()
 
         if (url.indexOf('data:') === 0){
             return orgUrl
@@ -220,13 +214,7 @@ var _packBundles = function(bundles, options){
             console.log('save bundle', bundle.name, filePath)
         }
 
-        //var filePath = putDir
         fs.outputFileSync(filePath, bundle.source)
-
-        //    if (err){
-        //        console.error('Error writing bundle file', err)
-        //    }
-        //})
 
         bundle.newName = 'bundles/' + (isJs ? fileName.replace(/\.js$/, '') : fileName + '!')
         bundle.fileName = fileName
@@ -251,9 +239,7 @@ var _packBundles = function(bundles, options){
 
     if (options.packedSteal && main.name !== main.newName){
         var mainName = main.name.slice('bundles/'.length)
-        //main.source += "System.import('package.json!npm').then(function() {System.import('" + mainName+ "');});"
-        main.source += '\nSystem.import("' + mainName + '");'
-    }
+        main.source += "System.import('package.json!npm').then(function() {System.import('" + mainName+ "');});" }
 
     saveBundle(main)
 
@@ -263,6 +249,11 @@ var _packBundles = function(bundles, options){
 
 var packSteal = function(options){
     var paths = ['node_modules/steal-tools/node_modules/steal/steal.production.js', 'node_modules/steal/steal.production.js']
+
+    if (typeof options.packSteal == 'string'){
+        paths.unshift(options.packSteal)
+    }
+
     paths.every(function(p){
         if (fs.existsSync(p)){
             var data = fs.readFileSync(p)
