@@ -239,7 +239,10 @@ var _packBundles = function(bundles, options){
 
     if (options.packedSteal && main.name !== main.newName){
         var mainName = main.name.slice('bundles/'.length)
-        main.source += "System.import('package.json!npm').then(function() {System.import('" + mainName+ "');});" }
+        //main.source += "System.import('package.json!npm').then(function() {System.import('" + mainName+ "');});"
+        main.source += "\nsteal.import('" + mainName+ "');"
+        //main.source = main.source.replace(new RegExp("define\\('"  + mainName.replace('/', '\\/') +  "'"), "define('" + main.newName + "'")
+    }
 
     saveBundle(main)
 
