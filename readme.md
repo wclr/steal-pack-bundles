@@ -4,16 +4,16 @@
 
 
 Packing everything to one separate folder can be useful in different scenarios, for example: 
-    - if you want to separate strictly development code/assets (like images, fonts) from production ready (so you don't want to build bundles in the same folder where dev code is located)
-    - if you are uploading assets to cdn 
-    - you are packing it for mobile application
+  - if you want to separate strictly development code/assets (like images, fonts) from production ready (so you don't want to build bundles in the same folder where dev code is located)
+  - if you are uploading assets to cdn 
+  - you are packing it for mobile application
 
 
 Pack Bundles addresses the following problems/lacks of StealJS:
 
-1) There is definitely a certain lack of configuration flexibility in paths/bundlePath conventions. 
-2) There is no way to add hashes to bundles for cache busting.
-3) StealJS (steal-tools) does not handle any other assets aside from imported (statically or via `System.import`).  
+- There is definitely a certain lack of configuration flexibility in paths/bundlePath conventions. 
+- There is no way to add hashes to bundles for cache busting.
+- StealJS (steal-tools) does not handle any other assets aside from imported (statically or via `System.import`).  
 
 
 ### How it works and how to configure:
@@ -86,4 +86,4 @@ gulp.task('build', function (done) {
 
 > npm test
 
-to test built start web server that will server public directory
+to test built application, start web server that will server `public` directory
