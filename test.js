@@ -3,8 +3,6 @@ var fs = require('fs-extra')
 var stealTools = require('steal-tools')
 var expect = require('chai').expect
 
-console.log('here')
-
 describe('Build and pack with steal bundled', function(){
 
     this.timeout(20000);
@@ -13,38 +11,40 @@ describe('Build and pack with steal bundled', function(){
 
     before(function(done){
 
-        fs.emptyDirSync('test/build');
-
         stealTools.build({
-            config: 'test/package.json!npm',
-            main: "app",
-            bundlesPath: __dirname + '/build/bundles',
+            config: 'test/package.json!npm', // test is baseURL
+            main: "app/app",
+            bundlesPath: '../public/built',
+            //bundlesPath: __dirname + '/build/bundles',
             bundle: [
-                'app',
-                'detached-module'
+                'detached-module',
+                'components/detached-component'
             ]
         }, {
-            bundleSteal: true
+            //bundleSteal: true,
+            minify: false
         }).then(packBundles({
-            debug: true,
-            root: 'build', // relative to cwd
-            bundlesPath: 'bundles', //relative to root
+            root: 'public', // relative to cwd
+            emptyDir: true,
+            bundlesPath: 'assets', //relative to root
             shortHash: true,
             keepName: true,
-            removeFirstDirInName: true
-            //indexTemplate: 'web/index.dist.html'
+            //removeFirstDirInName: true,
+            packSteal: true,
+            indexTemplate: 'test/index.dist.html'
         })).then(function(){
 
-            fs.readdir('build/bundles', function(err, files){
+            fs.readdir('public/assets', function(err, files){
+                //console.log('result', files)
                 packedFiles = files
-                console.log('result', files)
                 done()
             })
         })
     })
 
     it('should clean up dir', function(){
-        expect(packedFiles.indexOf('app.js')).be.equal(-1)
+        expect(packedFiles.length).be.equal(5)
     })
+
 
 });

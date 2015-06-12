@@ -9,7 +9,7 @@ var hashName = function(fileName, data, options){
     if (options.shortHash){
         hash = hash.substring(0, 8)
     }
-    if (options.keepName || options.keepNameWithoutFirstDir){
+    if (options.keepName){
         var sep = typeof keepName == 'string' ? options.keepName : '-'
         return path.basename(fileName, ext) + sep + hash + ext
     } else {
@@ -128,6 +128,21 @@ var packIndex = function(bundles, options){
         return newUrl ? [attr, '=', quote, newUrl].join('') : orgUrl
     })
 
+
+    var main = bundles[0]
+    delete main.source
+    console.log('main', main)
+
+    indexData = indexData.replace(/<!-- steal-pack-bundles -->/,
+        ['<script src="', '/' + options.bundlesPath + '/' +
+            (options.packedSteal || main.fileName), '"',
+            options.packedSteal
+                ?  ' data-main="' + main.fileName.replace(/\.js$/, '') + '"'
+                : '',
+            ' data-bundles-path="."></script>'].join('')
+    )
+
+
     fs.outputFileSync(destPath, indexData)
     //fs.outputFile(destPath, indexData, function(err){
     //    console.log(err)
@@ -236,10 +251,27 @@ var _packBundles = function(bundles, options){
         main.source = main.source.replace(bundle.name, newName)
     })
 
+    if (options.packedSteal && main.name !== main.newName){
+        main.source += '\nSystem.import("' + main.name.slice('bundles/'.length)+ '");'
+    }
+
     saveBundle(main)
 
     packIndex(bundles, options)
 
+}
+
+var packSteal = function(options){
+    var paths = ['node_modules/steal-tools/node_modules/steal/steal.production.js', 'node_modules/steal/steal.production.js']
+    paths.every(function(p){
+        if (fs.existsSync(p)){
+            var data = fs.readFileSync(p)
+            var name = hashName (p, data, options)
+            fs.outputFileSync(options.bundlesDir + '/' + name, data)
+            options.packedSteal = name
+            return false
+        }
+    })
 }
 
 var packBundles = function(bundles, options) {
@@ -255,13 +287,21 @@ var packBundles = function(bundles, options) {
 
         options = (options instanceof Array) ? options : new Array(options)
 
-        options.forEach(function(item) {
-            item.base = item.base || process.cwd()
+        options.forEach(function(opts) {
 
-            var putDir = item.bundlesDir = path.resolve(item.base, item.root, item.bundlesPath)
+            opts.base = opts.base || process.cwd()
 
-            fs.emptyDirSync(putDir)
-            _packBundles(bundles, item)
+            var putDir = opts.bundlesDir = path.resolve(opts.base, opts.root, opts.bundlesPath)
+
+            if (opts.emptyDir){
+                fs.emptyDirSync(putDir)
+            }
+
+            if (opts.packSteal){
+                packSteal(opts)
+            }
+
+            _packBundles(bundles, opts)
 
         })
     }
