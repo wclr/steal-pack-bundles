@@ -130,8 +130,6 @@ var packIndex = function(bundles, options){
 
 
     var main = bundles[0]
-    delete main.source
-    console.log('main', main)
 
     indexData = indexData.replace(/<!-- steal-pack-bundles -->/,
         ['<script src="', '/' + options.bundlesPath + '/' +
@@ -252,7 +250,9 @@ var _packBundles = function(bundles, options){
     })
 
     if (options.packedSteal && main.name !== main.newName){
-        main.source += '\nSystem.import("' + main.name.slice('bundles/'.length)+ '");'
+        var mainName = main.name.slice('bundles/'.length)
+        //main.source += "System.import('package.json!npm').then(function() {System.import('" + mainName+ "');});"
+        main.source += '\nSystem.import("' + mainName + '");'
     }
 
     saveBundle(main)

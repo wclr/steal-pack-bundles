@@ -29,7 +29,7 @@ describe('Build and pack with steal bundled', function(){
             bundlesPath: 'assets', //relative to root
             shortHash: true,
             keepName: true,
-            //removeFirstDirInName: true,
+            removeFirstDirInName: true,
             packSteal: true,
             indexTemplate: 'test/index.dist.html'
         })).then(function(){
@@ -45,6 +45,5 @@ describe('Build and pack with steal bundled', function(){
     it('should clean up dir', function(){
         expect(packedFiles.length).be.equal(5)
     })
-
 
 });
