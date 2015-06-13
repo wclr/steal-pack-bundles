@@ -161,10 +161,10 @@ var packCssAssets = function(source, srcDir, options){
 }
 
 var makePackBundles = function(options){
-    return function(bundles){
+    return function(buildResult){
         return new Promise(function(resolve){
-            packBundles(bundles, options)
-            resolve(bundles)
+            packBundles(buildResult, options)
+            resolve(buildResult)
         })
     }
 }

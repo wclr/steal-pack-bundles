@@ -16,10 +16,10 @@ Pack Bundles addresses the following problems/lacks of StealJS:
 
 ### How it works and how to configure:
 
-Assume you have the following structure
+Assume you have the following structure (structure is consciously complicated) 
 ```
-/client - folder of your client code
-     /app.js - main application file
+/app - folder of your client code
+     /app.js        
      /package.json - client app package.json
      /index.dist.html - template for production build
 /public - folder where from you want to serve you production application
@@ -32,22 +32,19 @@ Assume you have the following structure
   - add bundlesPath - where steal.build will output built result (relative to "baseURL") - we actually don't need these files ase we use in memory bundles result for packing, but this path is important as urls in css files are resolved using it. 
   or we can put it in destination pack folder, so it will be emptied before packing.   
   
-2) configure packBundles
-        
-How packBundles words:   
-   - takes steal.build in-memory result (http://stealjs.com/docs/steal-tools.BuildResult.html)
+2) configure packBundles, considering how packBundles works:   
+   - it takes steal.build in-memory result (http://stealjs.com/docs/steal-tools.BuildResult.html)
    - adds hashes to bundles/assets names based of file content
         - set if you need hashes on files (`hash` or `shortHash` to `true`)
         - if you want to keep friendly name set `keepName` to `true`   
    - parses the source of main bundle and replaces path configuration for bundles
         - removes standard `System.paths["bundles/*.css"]` and `System.paths["bundles/*"]`
         - replaces with correct paths to load packed files
-   - finds urls in CSS assets and puts it together with bundles replacing urls with new correct ones.
-      
-   - puts everything in `root` as destination folder 
+   - finds urls in CSS assets and puts them together with other assets replacing urls with new correct ones.      
+   - puts everything in `root` folder, that is supposed to be root served by your web server 
         - set `packedDir` (relative to `root`) to put packed assets in `root/packedDir`
-   - packs steal.production.js if needed using (put to packed dir if not found bundled with main bundle)  
-   - handles `indexTemplate` index.html production template and puts result to `root`
+   - packs steal.production.js if needed (put to packed dir if not found bundled with main bundle)  
+   - handles `indexTemplate` as index.html production template and puts result to `root/index.html` (or you can set custom destination path using `indexDest` option)
         - finds assets urls in index template assets and puts it together with other packed bundles/assets
         - adds correct script tag to load packed app replacing `<!-- steal-pack-bundles -->` comment
           
@@ -60,7 +57,7 @@ var packBundles = require('steal-pack-bundles')
 
 gulp.task('build', function (done) {
     stealTools.build({
-        config: 'client/package.json!npm' // baseURL is now "client"
+        config: 'app/package.json!npm' // baseURL is now "client"
         main: 'app', // relative to baseURL
         bundlesPath: '../public/assets', // relative to baseURL, where files will be output
     }, {
