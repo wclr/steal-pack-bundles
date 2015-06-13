@@ -97,8 +97,6 @@ access:
 `http://localhost:9000/app/index.html` - dev app
 
 `http://localhost:9000/packed/index.html` - packed app without steal bundled
-
-`http://localhost:9000/packed/index.html` - packed app without steal bundled
 `http://localhost:9000/packed/index_bundled.html` - packed app with steal bundled
 
 `http://localhost:9000/built/index.html` - steal built app without steal bundled

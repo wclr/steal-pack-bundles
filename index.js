@@ -163,11 +163,8 @@ var packCssAssets = function(source, srcDir, options){
 var makePackBundles = function(options){
     return function(bundles){
         return new Promise(function(resolve){
-            // timeout to ensure built bundles free before removal
-            //setTimeout(function(){
             packBundles(bundles, options)
             resolve(bundles)
-            //}, 100)
         })
     }
 }
@@ -298,7 +295,7 @@ var packBundles = function(buildResult, options) {
         }
 
         if (!options.packSteal){
-            // TODO: replace with correct determination if steal is bundled
+            // TODO: replace with correct detection if steal is bundled
             var stealIndex = bundles[0].source.indexOf('steal =')
             options.packSteal = !(stealIndex > 0 && stealIndex < 100)
         }
@@ -309,9 +306,7 @@ var packBundles = function(buildResult, options) {
         }
 
         _packBundles(bundles, options)
-
     }
 }
-
 
 module.exports = packBundles
