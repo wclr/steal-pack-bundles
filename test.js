@@ -7,43 +7,106 @@ describe('Build and pack with steal bundled', function(){
 
     this.timeout(20000);
 
-    var packedFiles
 
-    before(function(done){
 
-        stealTools.build({
-            config: 'test/package.json!npm', // test is baseURL
-            main: "app/app",
-            bundlesPath: '../public/built',
-            //bundlesPath: __dirname + '/build/bundles',
-            bundle: [
-                'detached-module',
-                'components/detached-component'
-            ]
-        }, {
-            //bundleSteal: true,
-            minify: false
-        }).then(packBundles({
-            root: 'public', // relative to cwd
-            emptyDir: true,
-            bundlesPath: 'assets', //relative to root
-            shortHash: true,
-            keepName: true,
-            removeFirstDirInName: true,
-            packSteal: true,
-            indexTemplate: 'test/index.dist.html'
-        })).then(function(){
+    describe('With no steal bundled', function(){
 
-            fs.readdir('public/assets', function(err, files){
-                //console.log('result', files)
-                packedFiles = files
-                done()
+        var packedFiles
+
+        fs.deleteSync('packed/index.html')
+        fs.emptyDirSync('built/bundles')
+
+        before(function(done){
+
+            stealTools.build({
+                config: 'app/package.json!npm', // test is baseURL
+                main: "web/web",
+                bundlesPath: '../built/bundles',
+                bundle: [
+                    'detached-module',
+                    'components/detached-component'
+                ]
+            }, {
+                //bundleSteal: true,
+                minify: false,
+                quiet: true
+            }).then(packBundles({
+                root: '', // relative to cwd
+                emptyDir: true,
+                packedDir: 'packed/assets', //relative to root
+                shortHash: true,
+                keepName: true,
+                removeFirstDirInName: true,
+                indexTemplate: 'app/index.dist.html',
+                indexDest: 'packed/index.html'
+            })).then(function(){
+
+                fs.readdir('packed/assets', function(err, files){
+                    //console.log('result', files)
+                    packedFiles = files
+                    done()
+                })
             })
         })
+
+        it('should have correct packed files amount', function(){
+            expect(packedFiles.length).be.equal(6)
+        })
+
+        it('index exists', function(){
+            expect(fs.existsSync('packed/index.html')).be.true
+        })
+
     })
 
-    it('should clean up dir', function(){
-        expect(packedFiles.length).be.equal(5)
+    describe('With steal bundled, no hashes', function(){
+
+        var packedFiles
+
+        fs.deleteSync('packed/index_bundled.html')
+        fs.emptyDirSync('built/bundles_bundled')
+
+        before(function(done){
+
+            stealTools.build({
+                config: 'app/package.json!npm', // test is baseURL
+                main: "web/web",
+                bundlesPath: '../built/bundles_bundled',
+                bundle: [
+                    'detached-module',
+                    'components/detached-component'
+                ]
+            }, {
+                bundleSteal: true,
+                minify: false,
+                quiet: true
+            }).then(packBundles({
+                root: '', // relative to cwd
+                //debug: true,
+                emptyDir: true,
+                packedDir: 'packed/assets_bundled', //relative to root
+                keepName: true,
+                removeFirstDirInName: false,
+                indexTemplate: 'app/index.dist.html',
+                indexDest: 'packed/index_bundled.html'
+            })).then(function(){
+
+                fs.readdir('packed/assets_bundled', function(err, files){
+                    packedFiles = files
+                    done()
+                })
+            })
+        })
+
+        it('have correct packed files amount', function(){
+            expect(packedFiles.length).be.equal(5)
+        })
+
+        it('index exists', function(){
+            expect(fs.existsSync('packed/index_bundled.html')).be.true
+        })
+
     })
 
 });
+

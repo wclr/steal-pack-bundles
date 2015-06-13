@@ -1,3 +1,5 @@
 .idea
 node_modules
-public
+built/bundles
+built/bundles_bundled
+packed

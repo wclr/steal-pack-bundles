@@ -56,7 +56,7 @@ var packUrlAsset = function(url, srcDir, destDir, options){
     options.packedAssets = options.packedAssets || {}
 
     var putFilePath = options.packedAssets[filePath],
-        assetDestDir = options.bundlesDir
+        assetDestDir = options.packedDir
 
     if (!putFilePath){
         var data = fs.readFileSync(filePath),
@@ -154,7 +154,7 @@ var packCssAssets = function(source, srcDir, options){
             return orgUrl
         }
 
-        var newUrl = packUrlAsset(url, srcDir, options.bundlesDir, options)
+        var newUrl = packUrlAsset(url, srcDir, options.packedDir, options)
 
         return newUrl ? 'url(' + newUrl + ')' : orgUrl
     })
@@ -174,7 +174,7 @@ var makePackBundles = function(options){
 var _packBundles = function(bundles, options){
 
     var main = bundles[0]
-    var putDir = options.bundlesDir
+    var putDir = options.packedDir
 
     main.source = main.source.replace(/System\.paths\["bundles\/.*?\n/g, '')
 
@@ -225,13 +225,14 @@ var _packBundles = function(bundles, options){
 
     bundles.forEach(function(bundle, i){
 
-        bundle.orginalDir = path.resolve(putDir, path.dirname(bundle.name.slice('bundles/'.length)))
+        var bundleRelativeDir = path.dirname(bundle.name.slice('bundles/'.length)),
+            originalDir = path.resolve(options.builtDir || putDir, bundleRelativeDir)
 
         // skip main bundle
         if (i === 0) return
 
         if (bundle.buildType == 'css'){
-            bundle.source = packCssAssets(bundle.source, bundle.orginalDir, options)
+            bundle.source = packCssAssets(bundle.source, originalDir, options)
         }
         var newName = saveBundle(bundle)
         main.source = main.source.replace(bundle.name, newName)
@@ -261,43 +262,54 @@ var packSteal = function(options){
         if (fs.existsSync(p)){
             var data = fs.readFileSync(p)
             var name = hashName (p, data, options)
-            fs.outputFileSync(options.bundlesDir + '/' + name, data)
+            fs.outputFileSync(options.packedDir + '/' + name, data)
             options.packedSteal = name
             return false
         }
     })
 }
 
-var packBundles = function(bundles, options) {
+var packBundles = function(buildResult, options) {
 
     if (typeof options == 'undefined') {
-        return makePackBundles(bundles)
+        return makePackBundles(buildResult)
     } else {
 
-        bundles = bundles.bundles || bundles // bug
+        var bundles = buildResult.bundles || buildResult // steal bug
         bundles.forEach(function(bundle) {
             bundle.source = bundle.source.code || bundle.source
         })
 
-        options = (options instanceof Array) ? options : new Array(options)
+        var loader = buildResult.loader
 
-        options.forEach(function(opts) {
+        // TODOL: replace bundlesPath API with packedDir
+        options.bundlesPath = options.bundlesPath || options.packedDir
 
-            opts.base = opts.base || process.cwd()
+        if (loader){
+            options.builtDir = options.builtDir || path.join( loader.baseURL, loader.bundlesPath)
+        }
 
-            var putDir = opts.bundlesDir = path.resolve(opts.base, opts.root, opts.bundlesPath)
+        options.base = options.base || process.cwd()
 
-            if (opts.emptyDir){
-                fs.emptyDirSync(putDir)
-            }
+        var packedDir = options.packedDir = path.resolve(options.base, options.root, options.bundlesPath)
 
-            if (opts.packSteal){
-                packSteal(opts)
-            }
+        if (options.emptyDir){
+            fs.emptyDirSync(packedDir)
+        }
 
-            _packBundles(bundles, opts)
+        if (!options.packSteal){
+            // TODO: replace with correct determination if steal is bundled
+            var stealIndex = bundles[0].source.indexOf('steal =')
+            options.packSteal = !(stealIndex > 0 && stealIndex < 100)
+        }
 
-        })
+
+        if (options.packSteal){
+            packSteal(options)
+        }
+
+        _packBundles(bundles, options)
+
     }
 }
 
