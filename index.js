@@ -173,6 +173,7 @@ var _packBundles = function(bundles, options){
     var main = bundles[0]
     var putDir = options.packedDir
 
+    // remove default bundles path
     main.source = main.source.replace(/System\.paths\["bundles\/.*?\n/g, '')
 
     if (options.removeBaseURL){
@@ -188,10 +189,6 @@ var _packBundles = function(bundles, options){
         var bundleDir = path.dirname(fileName)
         fileName = path.basename(fileName)
 
-        if (options.debug){
-            console.log('packBundles bundle', bundle.name, bundleDir, fileName)
-        }
-
         if (bundleDir !== '.'){
             var bundleDirParts = bundleDir.split('/')
             if (options.removeFirstDirInName){
@@ -204,12 +201,10 @@ var _packBundles = function(bundles, options){
         if (options.hash || options.shortHash){
             fileName = hashName(fileName, bundle.source, options)
         }
+        console.log('Saving bundle', bundle.name, '-->', fileName)
 
         var filePath = path.join(putDir, fileName)
 
-        if (options.debug){
-            console.log('save bundle', bundle.name, filePath)
-        }
 
         fs.outputFileSync(filePath, bundle.source)
 
@@ -232,7 +227,7 @@ var _packBundles = function(bundles, options){
             bundle.source = packCssAssets(bundle.source, originalDir, options)
         }
         var newName = saveBundle(bundle)
-        main.source = main.source.replace(bundle.name, newName)
+        main.source = main.source.replace('"' + bundle.name + '"', '"' + newName + '"')
     })
 
     if (options.packedSteal && main.name !== main.newName){
@@ -272,6 +267,8 @@ var packBundles = function(buildResult, options) {
         return makePackBundles(buildResult)
     } else {
 
+        console.log('Steal Pack Bundles started...')
+
         var bundles = buildResult.bundles || buildResult // steal bug
         bundles.forEach(function(bundle) {
             bundle.source = bundle.source.code || bundle.source
@@ -290,7 +287,10 @@ var packBundles = function(buildResult, options) {
 
         var packedDir = options.packedDir = path.resolve(options.base, options.root, options.bundlesPath)
 
+        console.log('Packing assets to', packedDir)
+
         if (options.emptyDir){
+            console.log('Cleaning directory')
             fs.emptyDirSync(packedDir)
         }
 
@@ -299,7 +299,6 @@ var packBundles = function(buildResult, options) {
             var stealIndex = bundles[0].source.indexOf('steal =')
             options.packSteal = !(stealIndex > 0 && stealIndex < 100)
         }
-
 
         if (options.packSteal){
             packSteal(options)

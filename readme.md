@@ -63,8 +63,8 @@ gulp.task('build', function (done) {
     }, {
         bundleSteal: true
     }).then(packBundles({
-        root: 'public', //  relative to cwd, where to built files, this folder is supposed to be root of serving server / 
-        packedDir: 'assets', //where to put packed files, relative to root        
+        root: 'public', // relative to cwd, where to built files, this folder is supposed to be root of serving server / 
+        packedDir: 'assets', // where to put packed files, relative to root        
         shortHash: true, // addes short (8 symbols) hashes
         keepName: true, // keeps original names in place
         removeFirstDirInName: true, // pack bundles flattens built file structure by adding for example "components-" prefix, so you can remove first dir name
