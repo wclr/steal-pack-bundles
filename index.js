@@ -19,12 +19,8 @@ var hashName = function(fileName, data, options){
 
 var packUrlAsset = function(url, srcDir, destDir, options){
 
-    if(/^data:/.test(url)){
+    if(/^data:/.test(url) || /^https?:\/\//.test(url)){
         return url
-    }
-
-    if (options.debug){
-        console.log('packUrlAsset', url, srcDir, destDir)
     }
 
     var absolute = false
@@ -34,12 +30,13 @@ var packUrlAsset = function(url, srcDir, destDir, options){
         url = url.slice(1)
     }
 
-    //resolve file path relative to assets dest ??
-
     var base = absolute ? path.resolve(options.base, options.assetsBase || '') : srcDir
 
+    if (options.debug){
+        console.log('packUrlAsset', 'url', url, 'srcDir', srcDir, 'destDir',  destDir, 'base', base)
+    }
+
     var filePath = path.resolve(base, url)
-    //console.log('packUrlAssets', url, absolute, base, filePath)
 
     // for handling assets like somefont.eot?#iefix
     var fileNameAppendix = filePath.match(/[?#]+.*$/) || ''
@@ -58,6 +55,8 @@ var packUrlAsset = function(url, srcDir, destDir, options){
     var putFilePath = options.packedAssets[filePath],
         assetDestDir = options.packedDir
 
+    var rootPath = absolute ? path.join(options.base, options.root) : destDir
+
     if (!putFilePath){
         var data = fs.readFileSync(filePath),
             fileName = path.basename(filePath)
@@ -69,13 +68,13 @@ var packUrlAsset = function(url, srcDir, destDir, options){
         // join or resolve?
         putFilePath = path.resolve(assetDestDir, fileName)
 
+        console.log('Saving asset', path.relative(rootPath, putFilePath))
         fs.outputFileSync(putFilePath, data)
 
         options.packedAssets[filePath] = putFilePath
     }
 
-    var rootPath = absolute ? path.join(options.base, options.root) : destDir,
-        cutIndex = rootPath.length + (absolute ? 0 : 1),
+    var cutIndex = rootPath.length + (absolute ? 0 : 1),
         newUrl = putFilePath.substring(cutIndex).replace(/\\/g, '/') + fileNameAppendix
 
     return newUrl
@@ -280,10 +279,11 @@ var packBundles = function(buildResult, options) {
         options.bundlesPath = options.bundlesPath || options.packedDir
 
         if (loader){
-            options.builtDir = options.builtDir || path.join( loader.baseURL, loader.bundlesPath)
+            options.builtDir = options.builtDir
+                || path.join( loader.baseURL.replace('file:', ''), loader.bundlesPath)
         }
 
-        options.base = options.base || process.cwd()
+        options.base = path.resolve(options.base || '')
 
         var packedDir = options.packedDir = path.resolve(options.base, options.root, options.bundlesPath)
 
