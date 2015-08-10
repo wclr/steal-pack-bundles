@@ -68,7 +68,7 @@ var packUrlAsset = function(url, srcDir, destDir, options){
         // join or resolve?
         putFilePath = path.resolve(assetDestDir, fileName)
 
-        console.log('Saving asset', path.relative(rootPath, putFilePath))
+        console.log('Saving asset:', path.relative(rootPath, putFilePath))
         fs.outputFileSync(putFilePath, data)
 
         options.packedAssets[filePath] = putFilePath
@@ -92,7 +92,8 @@ var packIndex = function(bundles, options){
     }
 
     var template = fs.readFileSync(templatePath, options.indexEcoding || 'utf-8'),
-        destPath = path.resolve(options.base, options.root, options.indexDest || 'index.html')
+        destPath = path.resolve(options.base, options.root, options.indexDest || 'index.html'),
+        templateDir = path.dirname(templatePath)
 
     var indexData = template.replace(/(href|src)=("|')([^"']+)/ig, function(orgUrl, attr, quote, url){
         url = url.trim()
@@ -118,7 +119,7 @@ var packIndex = function(bundles, options){
 
         }
 
-        var templateDir = path.dirname(templatePath)
+
         var destDir = path.dirname(destPath)
         var newUrl = packUrlAsset(url, templateDir, destDir, options)
 
@@ -128,7 +129,7 @@ var packIndex = function(bundles, options){
 
     var main = bundles[0]
 
-    indexData = indexData.replace(/<!-- steal-pack-bundles -->/,
+    indexData = indexData.replace(/<!--\s?steal-pack-bundles\s?-->/,
         ['<script src="', '/' + options.bundlesPath + '/' +
             (options.packedSteal || main.fileName), '"',
             options.packedSteal
@@ -137,6 +138,19 @@ var packIndex = function(bundles, options){
             ' data-bundles-path="."></script>'].join('')
     )
 
+    indexData = indexData.replace(/<!--\s?content:(.*?)\s?-->/g, function(whole, url){
+        var filePath = path.resolve(templateDir, url)
+
+        console.log('replace content', filePath)
+        if (fs.existsSync(filePath)){
+            return fs.readFileSync(filePath, 'utf-8')
+        } else {
+            console.warn('No file for content replacement:', filePath)
+        }
+        return whole
+    })
+
+    console.log('Saving index:', options.indexDest || 'index.html')
     fs.outputFileSync(destPath, indexData)
 }
 
@@ -200,7 +214,7 @@ var _packBundles = function(bundles, options){
         if (options.hash || options.shortHash){
             fileName = hashName(fileName, bundle.source, options)
         }
-        console.log('Saving bundle', bundle.name, '-->', fileName)
+        console.log('Saving bundle:', bundle.name, '-->', fileName)
 
         var filePath = path.join(putDir, fileName)
 
