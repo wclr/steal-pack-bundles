@@ -138,7 +138,7 @@ var packIndex = function(bundles, options){
             ' data-bundles-path="."></script>'].join('')
     )
 
-    indexData = indexData.replace(/<!--\s?content:(.*?)\s?-->/g, function(whole, url){
+    indexData = indexData.replace(/<!--\s?inject:(.*?)\s?-->/g, function(whole, url){
         var filePath = path.resolve(templateDir, url)
 
         console.log('replace content', filePath)
