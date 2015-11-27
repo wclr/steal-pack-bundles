@@ -128,12 +128,16 @@ var packIndex = function(bundles, options){
 
 
     var main = bundles[0]
+    var env = options.env || "production"
 
     indexData = indexData.replace(/<!--\s?steal-pack-bundles\s?-->/,
         ['<script src="', '/' + options.bundlesPath + '/' +
             (options.packedSteal || main.fileName), '"',
             options.packedSteal
                 ?  ' data-main="' + main.fileName.replace(/\.js$/, '') + '"'
+                : '',
+            env
+                ?  ' data-env="' + env + '"'
                 : '',
             ' data-bundles-path="."></script>'].join('')
     )
@@ -289,7 +293,7 @@ var packBundles = function(buildResult, options) {
 
         var loader = buildResult.loader
 
-        // TODOL: replace bundlesPath API with packedDir
+        // TODO: replace bundlesPath API with packedDir
         options.bundlesPath = options.bundlesPath || options.packedDir
 
         if (loader){
