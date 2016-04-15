@@ -1,10 +1,11 @@
 {
   "name": "steal-pack-bundles",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "description": "StealJS bundles and assets packer",
   "repository": "https://github.com/whitecolor/steal-pack-bundles",
   "main": "index.js",
   "scripts": {
+    "build-app": "node-dev --respawn build.js",
     "test": "mocha test.js"
   },
   "author": "",

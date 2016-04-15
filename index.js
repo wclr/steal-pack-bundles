@@ -106,7 +106,7 @@ var packIndex = function(bundles, options){
             var main = bundles[0]
 
             var mainBundleUrl = options.bundlesPath + '/' + main.fileName,
-                bundlesPath = '.'
+                bundlesPath = options.bundlesPath
 
             if (url[0] == '/'){
                 mainBundleUrl = '/' + mainBundleUrl
@@ -139,7 +139,7 @@ var packIndex = function(bundles, options){
             env
                 ?  ' data-env="' + env + '"'
                 : '',
-            ' data-bundles-path="."></script>'].join('')
+            ' data-bundles-path="' + options.bundlesPath + '"></script>'].join('')
     )
 
     indexData = indexData.replace(/<!--\s?inject:(.*?)\s?-->/g, function(whole, url){
