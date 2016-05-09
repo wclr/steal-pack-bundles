@@ -130,9 +130,14 @@ var packIndex = function(bundles, options){
     var main = bundles[0]
     var env = options.env || "production"
 
+    var scriptPath = options.bundlesPath + '/'
+      + (options.packedSteal || main.fileName)
+    if (scriptPath[0] !== '/') {
+        scriptPath = '/' + scriptPath
+    }
+
     indexData = indexData.replace(/<!--\s?steal-pack-bundles\s?-->/,
-        ['<script src="', '/' + options.bundlesPath + '/' +
-            (options.packedSteal || main.fileName), '"',
+        ['<script src="', scriptPath + '"',
             options.packedSteal
                 ?  ' data-main="' + main.fileName.replace(/\.js$/, '') + '"'
                 : '',
@@ -303,7 +308,11 @@ var packBundles = function(buildResult, options) {
 
         options.base = path.resolve(options.base || '')
 
-        var packedDir = options.packedDir = path.resolve(options.base, options.root, options.bundlesPath)
+        var bundlesPath = options.bundlesPath
+        if (bundlesPath[0] === '/'){
+            bundlesPath = bundlesPath.slice(1)
+        }
+        var packedDir = options.packedDir = path.resolve(options.base, options.root, bundlesPath)
 
         console.log('Packing assets to', packedDir)
 
