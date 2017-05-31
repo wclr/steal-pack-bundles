@@ -125,10 +125,11 @@ var packIndex = function(bundles, options){
 
         return newUrl ? [attr, '=', quote, newUrl].join('') : orgUrl
     })
-
+    indexData = packCssAssets(indexData, templateDir, options)
 
     var main = bundles[0]
-    var env = options.env || "production"
+    var env = options.env || 'production'
+    var baseUrl = typeof options.baseUrl == 'string' ? options.baseUrl : '/'
 
     var scriptPath = options.bundlesPath + '/'
       + (options.packedSteal || main.fileName)
@@ -143,6 +144,9 @@ var packIndex = function(bundles, options){
                 : '',
             env
                 ?  ' data-env="' + env + '"'
+                : '',
+            baseUrl
+                ? ' data-base-url="' + baseUrl + '"'            
                 : '',
             ' data-bundles-path="' + options.bundlesPath + '"></script>'].join('')
     )
