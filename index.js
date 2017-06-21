@@ -133,9 +133,9 @@ var packIndex = function(bundles, options){
 
     var scriptPath = options.bundlesPath + '/'
       + (options.packedSteal || main.fileName)
-    if (scriptPath[0] !== '/') {
-        scriptPath = '/' + scriptPath
-    }
+    // if (scriptPath[0] !== '/') {
+    //     scriptPath = '/' + scriptPath
+    // }
 
     indexData = indexData.replace(/<!--\s?steal-pack-bundles\s?-->/,
         ['<script src="', scriptPath + '"',

@@ -41,7 +41,7 @@ describe('Build and pack with steal bundled', function(){
     })
 
     it('should have correct packed files amount', function(){
-      expect(packedFiles.length).be.equal(6)
+      expect(packedFiles.length).be.equal(5)
     })
 
     it('index exists', function(){

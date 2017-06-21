@@ -21,8 +21,8 @@ gulp.task('build', function (done) {
         bundleSteal: true
     }).then(packBundles({
         root: 'public', // location (relative to cwd), where to built files, this folder is supposed to be public root of http server. 
-        packedDir: 'assets', // where to put packed files, relative to root 
-        // bundlesPath: the same as packedDir
+        packedDir: '/assets', // where to put packed files, relative to root, this will be added to script in src="/assets/main-bundle.js", if want relative path use just 'assets'
+        bundlesPath: // the same as packedDir *depricated*
         shortHash: true, // adds short (8 symbols) hashes
         keepName: true, // keeps original names in place (if `false` there will be only hashes)
         baseUrl: "/some", // will set this value to baseURL of steal, deafult is "/", empty string will not set baseURL at all

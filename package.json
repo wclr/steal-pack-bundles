@@ -1,6 +1,6 @@
 {
   "name": "steal-pack-bundles",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "StealJS bundles and assets packer",
   "repository": "https://github.com/whitecolor/steal-pack-bundles",
   "main": "index.js",
